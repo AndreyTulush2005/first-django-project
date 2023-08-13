@@ -2,9 +2,12 @@ from django.db import models
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 # Create your models here.
-
 
 class Advertisement(models.Model):
     title = models.CharField('Загаловок', max_length=128)
@@ -13,7 +16,8 @@ class Advertisement(models.Model):
     auction = models.BooleanField('Торг', help_text='Отметьте, если торг уместен')
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-
+    user = models.ForeignKey(User, verbose_name='Пользователь', on_delete=models.CASCADE)
+    image = models.ImageField('Изображение', upload_to='firstProject/')
     def __str__(self):
         return f"Advertisement(title={self.title}, description={self.description}, price={self.price}, auction={self.auction})"
 
@@ -36,5 +40,13 @@ class Advertisement(models.Model):
             )
 
         return self.updated_date.strftime("%d.%m.%Y в %H:%M:%S")
+
+    @admin.display(description='Изображение')
+    def imageAdmin(self):
+        if self.image:
+            return format_html(
+                '<img src="{}" width="100px">', self.image.url
+            )
+
     class Meta:
         db_table = 'Advertisement'
